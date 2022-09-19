@@ -53,13 +53,26 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
-        case WM_MOUSEMOVE:
+        case WM_MOUSEMOVE: {
             sprite.x = LOWORD(lParam) - sprite.WIDTH / 2;
             sprite.y = HIWORD(lParam) - sprite.HEIGHT / 2;
 
             InvalidateRect(hWnd, NULL, TRUE);
             break;
-        case WM_KEYDOWN:
+        }
+        case WM_MOUSEWHEEL: {
+            int wheelOffset = GET_WHEEL_DELTA_WPARAM(wParam);
+
+            if (LOWORD(wParam) == MK_SHIFT) {
+                wheelOffset > 0 ? (sprite.x += sprite.SPEED) : (sprite.x -= sprite.SPEED);
+            } else {
+                wheelOffset > 0 ? (sprite.y -= sprite.SPEED) : (sprite.y += sprite.SPEED);
+            }
+
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
+        }
+        case WM_KEYDOWN: {
             switch (wParam) {
                 case VK_RIGHT:
                     sprite.x += sprite.SPEED;
@@ -76,22 +89,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             }
 
             InvalidateRect(hWnd, NULL, TRUE);
+
             break;
+        }
         case WM_DESTROY:
             PostQuitMessage(0);
-            break;
 
+            break;
         case WM_PAINT:
             PAINTSTRUCT ps;
             HDC hdc = GetDC(hWnd);
-
 
             BeginPaint(hWnd, &ps);
             FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(255, 255, 255)));
             HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 67));
             SelectObject(hdc, hBrush);
-             Ellipse(hdc, sprite.x, sprite.y, sprite.x + sprite.WIDTH, sprite.y + sprite.HEIGHT);
-           // Ellipse(hdc, xPos, yPos, xPos + sprite.WIDTH, yPos + sprite.HEIGHT);
+            Ellipse(hdc, sprite.x, sprite.y, sprite.x + sprite.WIDTH, sprite.y + sprite.HEIGHT);
 
             EndPaint(hWnd, &ps);
             break;
